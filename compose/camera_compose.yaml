@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  camera:
+    image: openorbbecsdk-env:aarch64_ros2_orbbec_20260212
+    container_name: camera_pycharm
+    hostname: camera
+    privileged: true
+    network_mode: host
+    volumes:
+      - /dev:/dev
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ${HOME}/.Xauthority:${HOME}/.Xauthority:ro
+      - ${HOME}/Documents/ws:/ws
+    environment:
+      - ROS_DOMAIN_ID=0
+      - DISPLAY=0
+      - XAUTHORITY=${HOME}/.Xauthority
+    extra_hosts:
+      - "camera:127.0.0.1"

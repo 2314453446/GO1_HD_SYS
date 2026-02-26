@@ -1,0 +1,18 @@
+export ADE_NAME=camera
+
+export ADE_DOCKER_RUN_ARGS="--cap-add=SYS_PTRACE \
+ --privileged \
+ --net=host \
+ --hostname camera \
+ --add-host camera:127.0.0.1 \
+ -v /dev:/dev \
+ -e ROS_DOMAIN_ID=0 \
+ -v ${HOME}/.Xauthority:${HOME}/.Xauthority:ro \
+ -e XAUTHORITY=${HOME}/.Xauthority \
+ -v /tmp/.X11-unix:/tmp/.X11-unix \
+ -e DISPLAY \
+"
+
+export ADE_IMAGES="openorbbecsdk-env:aarch64_ros2_orbbec_20260212"
+
+

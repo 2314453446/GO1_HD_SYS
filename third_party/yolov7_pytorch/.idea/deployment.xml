@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" autoUpload="Always" serverName="zhewang@168.131.123.34:22 password">
+    <serverData>
+      <paths name="khlee@ailab4.jnu.ac.kr:8822">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/khlee/Project/yolov7-pytorch" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="khlee@ailab4.jnu.ac.kr:8822 (2)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="zhewang@168.131.123.34:22 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/zhewang/Project/yolov7-pytorch" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="zhewang@168.131.123.34:22 password (clip)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="zhewang@168.131.123.34:22 password (detr)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="zhewang@168.131.123.34:22 password (sam)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="zhewang@168.131.123.34:22 password (server_biliii)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="zhewang@168.131.123.34:22 password (ultralytics)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="zhewang@168.131.123.34:22 password(yolov7-pytorch)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/zhewang/Project/yolov7-pytorch" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
+  </component>
+</project>
