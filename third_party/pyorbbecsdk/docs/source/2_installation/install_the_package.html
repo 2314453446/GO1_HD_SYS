@@ -1,0 +1,514 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2.2. Linux &mdash; OrbbecSDK V2 Python Wrapper  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=a2eacb60" />
+
+  
+    <link rel="shortcut icon" href="../../_static/orbbec_footerlogo_3d_world.svg"/>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="2.4. Build from Source" href="build_the_package.html" />
+    <link rel="prev" title="2.1. Registration script (required)" href="registration_script.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            OrbbecSDK V2 Python Wrapper
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../1_overview/overview.html">1. Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../1_overview/Introduction.html">1.1. Introduction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../1_overview/Introduction.html#support-hardware-products">1.1.1. Support Hardware Products</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../1_overview/Introduction.html#support-platforms">1.1.2. Support Platforms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../1_overview/OrbbecSDK_Overview.html">1.2. Orbbec SDK Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../1_overview/OrbbecSDK_Overview.html#terms">1.2.1. Terms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../1_overview/OrbbecSDK_Overview.html#orbbec-sdk-v2-architecture-overview">1.2.2. Orbbec SDK v2 Architecture Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../1_overview/OrbbecSDK_Overview.html#sdk-concept-overview">1.2.3. SDK Concept Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../1_overview/OrbbecSDK_Overview.html#sdk-programming-model">1.2.4. SDK Programming Model</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="installation.html">2. Installation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="registration_script.html">2.1. Registration script (required)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="registration_script.html#install-udev-rules-script-linux">2.1.1. install udev rules script (Linux)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="registration_script.html#registering-metadata-using-a-script-windows">2.1.2. Registering Metadata Using a Script (Windows)</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.2. Linux</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installation">2.2.1. Installation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#online-installation">2.2.1.1. Online installation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#offline-installation">2.2.1.2. Offline installation</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#prerequisites">2.2.1.2.1. Prerequisites</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#download-the-appropriate-whl-package">2.2.1.2.2. Download the Appropriate .whl Package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#install-the-package">2.2.1.2.3. Install the Package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#verify-the-installation">2.2.2. Verify the Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-the-example">2.2.3. Run the Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#windows">2.3. Windows</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">2.3.1. Installation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">2.3.1.1. Online installation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">2.3.1.2. Offline installation</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#id4">2.3.1.2.1. Prerequisites</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id5">2.3.1.2.2. Download the Appropriate .whl Package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id6">2.3.1.2.3. Install the Package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">2.3.2. Verify the Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">2.3.3. Run the Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="build_the_package.html">2.4. Build from Source</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="build_the_package.html#environment">2.4.1. Environment</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="build_the_package.html#compilation-platform-requirements">2.4.1.1. Compilation Platform Requirements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="build_the_package.html#python-version">2.4.1.2. Python Version</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="build_the_package.html#linux-python-sdk-compilation">2.4.2. Linux Python SDK Compilation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="build_the_package.html#install-dependencies-ubuntu">2.4.2.1. Install Dependencies (Ubuntu)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="build_the_package.html#custom-python-path-optional">2.4.2.2. Custom Python Path (Optional)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="build_the_package.html#build-the-project">2.4.2.3. Build the Project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="build_the_package.html#run-the-examples">2.4.2.4. Run the Examples</a></li>
+<li class="toctree-l4"><a class="reference internal" href="build_the_package.html#generate-python-stubs">2.4.2.5. Generate Python Stubs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="build_the_package.html#making-a-python-wheel">2.4.2.6. Making a Python Wheel</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="build_the_package.html#windows-python-sdk-compilation">2.4.3. Windows Python SDK Compilation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="build_the_package.html#download-the-python-sdk-source-code">2.4.3.1. Download the Python SDK Source Code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="build_the_package.html#install-dependencies">2.4.3.2. Install Dependencies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="build_the_package.html#configure-visual-studio-project">2.4.3.3. Configure Visual Studio Project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="build_the_package.html#compile-the-python-sdk">2.4.3.4. Compile the Python SDK</a></li>
+<li class="toctree-l4"><a class="reference internal" href="build_the_package.html#test-examples">2.4.3.5. Test Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../3_QuickStarts/QuickStarts.html">3. QuickStarts</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../3_QuickStarts/QuickStart.html">3.1. Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../3_QuickStarts/QuickStart.html#build-your-first-camera-application">3.2. Build your First Camera Application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../3_QuickStarts/QuickStart.html#sample-features">3.3. Sample Features</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../4_Application_Guide/Application_Guide.html">4. Application Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html">4.1. Create Device</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#create-pipeline">4.2. Create Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#obtain-the-sensor-list">4.3. Obtain the Sensor List</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#obtain-video-data-streams">4.4. Obtain Video Data Streams</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#blocking-polling-mode-video-data-streams">4.4.1. Blocking Polling Mode (Video Data Streams)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#asynchronous-callback-mode-video-data-streams">4.4.2. Asynchronous Callback Mode (Video Data Streams)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#obtain-imu-data-streams">4.5. Obtain Imu Data Streams</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#blocking-polling-mode-imu-data-streams">4.5.1. Blocking Polling Mode (Imu Data Streams)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#asynchronous-callback-mode-imu-data-streams">4.5.2. Asynchronous Callback Mode (Imu Data Streams)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#obtain-the-camera-intrinsic-and-extrinsic-parameters">4.6. Obtain the Camera Intrinsic and Extrinsic Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#frame-aggregate">4.7. Frame Aggregate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#d2c">4.8. D2C</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#hardware-d2c">4.8.1. Hardware D2C</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#software-d2c">4.8.2. Software D2C</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#software-c2d">4.9. Software C2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#depth-point-cloud">4.10. Depth Point Cloud</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#rgbd-point-cloud">4.11. RGBD Point Cloud</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#noise-removeal-filter">4.12. Noise Removeal Filter</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#hardware-noise-removeal-filter">4.12.1. Hardware Noise Removeal Filter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#software-noise-removeal-filter">4.12.2. Software Noise Removeal Filter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#depth-post-processing-filters">4.13. Depth Post-Processing Filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#recording-and-playback">4.14. Recording and Playback</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#recording">4.14.1. Recording</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#playback">4.14.2. Playback</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#firmware-update">4.15. Firmware Update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#update-preset">4.16. Update Preset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#device-disconnection-and-reconnection">4.17. Device Disconnection and Reconnection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#commonly-used-interfaces">4.18. Commonly Used Interfaces</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#device-reboot">4.18.1. Device Reboot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#obtain-the-serial-number">4.18.2. Obtain the Serial Number</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#obtain-the-ip-config">4.18.3. Obtain the IP Config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#obtain-local-network-configuration">4.18.4. Obtain Local Network Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#ip-configuration">4.18.5. IP Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-ip-configuration-persistent">4.18.5.1. Set IP Configuration (Persistent)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#force-ip-configuration-temporary">4.18.5.2. Force IP Configuration (Temporary)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#obtain-device-temperature">4.18.6. Obtain Device Temperature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#obtain-device-baseline">4.18.7. Obtain Device Baseline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#stream-profile">4.18.8. Stream Profile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#obtain-imu-streamprofile">4.18.9. Obtain IMU StreamProfile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#obtain-intrinsic-and-extrinsic-parameters">4.18.10. Obtain Intrinsic and Extrinsic Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#obtain-imu-intrinsic-parameters">4.18.11. Obtain IMU Intrinsic Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#ldp-switch">4.18.12. LDP Switch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#hdr-merge">4.18.13. HDR Merge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#obtain-ldp-measurement-value">4.18.14. Obtain LDP Measurement Value</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#obtain-ldp-protection-status">4.18.15. Obtain LDP Protection Status</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#laser-switch">4.18.16. Laser Switch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#obtain-metadata">4.18.17. Obtain MetaData</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#triggered-capture">4.18.18. Triggered Capture</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#software-triggered-capture">4.18.18.1. Software Triggered Capture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#timed-capture">4.18.18.2. Timed Capture</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#timestamp-reset">4.18.19. Timestamp Reset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#device-time-synchronization">4.18.20. Device Time Synchronization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#d2d-disparity-to-depth">4.18.21. D2D (Disparity to depth)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#hardware-d2d">4.18.21.1. Hardware D2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#software-d2d">4.18.21.2. Software D2D</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#depth-settings">4.18.22. Depth Settings</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#depth-working-mode">4.18.22.1. Depth Working Mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#preset-configuration">4.18.22.2. Preset Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-depth-ae">4.18.22.3. Set Depth AE</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-depth-exposure">4.18.22.4. Set Depth Exposure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-depth-gain">4.18.22.5. Set Depth Gain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-depth-mirror">4.18.22.6. Set Depth Mirror</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-depth-flip">4.18.22.7. Set Depth Flip</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-depth-rotation">4.18.22.8. Set Depth Rotation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-the-unit-of-depth">4.18.22.9. Set the Unit of Depth</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-min-and-max-depth">4.18.22.10. Set Min and Max Depth</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#ir-parameter-settings">4.18.23. IR Parameter Settings</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-ir-ae">4.18.23.1. Set IR AE</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-ir-exposure">4.18.23.2. Set IR Exposure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-ir-gain">4.18.23.3. Set IR Gain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-ir-target-brightness">4.18.23.4. Set IR Target Brightness</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-ir-maximum-exposure-value">4.18.23.5. Set IR Maximum Exposure Value</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-ir-mirror">4.18.23.6. set IR Mirror</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-ir-flip">4.18.23.7. Set IR Flip</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-ir-rotation">4.18.23.8. Set IR Rotation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#color-parameter-settings">4.18.24. Color Parameter Settings</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-color-ae">4.18.24.1. Set Color AE</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-color-exposure">4.18.24.2. Set Color Exposure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-color-gain">4.18.24.3. Set Color Gain</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-color-mirror">4.18.24.4. set Color Mirror</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-color-flip">4.18.24.5. Set Color Flip</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-color-rotation">4.18.24.6. Set Color Rotation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-color-automatic-white-balance-awb">4.18.24.7. Set Color Automatic White Balance (AWB)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-color-white-balance-parameters">4.18.24.8. Set Color White Balance Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-the-color-brightness">4.18.24.9. Set the Color Brightness</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-color-sharpness">4.18.24.10. Set Color Sharpness</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-color-gamma">4.18.24.11. Set Color Gamma</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-color-saturation">4.18.24.12. Set Color Saturation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-color-hue">4.18.24.13. Set Color Hue</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-color-auto-exposure-priority">4.18.24.14. Set Color Auto Exposure Priority</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-color-backlight-compensation">4.18.24.15. Set Color Backlight Compensation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-color-contrast">4.18.24.16. Set Color Contrast</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-color-power-line-frequency">4.18.24.17. Set Color Power Line Frequency</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#multi-camera-synchronization">4.18.25. Multi-Camera Synchronization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#multi-camera-synchronous-hardware-connection">4.18.25.1. Multi-Camera Synchronous Hardware Connection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#multi-camera-synchronization-software-configuration">4.18.25.2. Multi-Camera Synchronization Software Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#frame-interleave">4.18.26. Frame Interleave</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#load-frame-interleave">4.18.26.1. Load Frame Interleave</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#check-frame-interleave-support">4.18.26.2. Check Frame Interleave Support</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#heart-beat-control">4.18.27. Heart Beat Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#log-management">4.18.28. Log Management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-the-log-level">4.18.28.1. Set the log level</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-the-log-output-to-the-console">4.18.28.2. Set the Log Output to the Console</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-log-output-to-file">4.18.28.3. Set Log Output to File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../4_Application_Guide/ApplicationGuide.html#set-the-log-callback-output">4.18.28.4. Set the Log Callback Output</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../5_FAQ/FAQ.html">5. FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">6. License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">OrbbecSDK V2 Python Wrapper</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="installation.html"><span class="section-number">2. </span>Installation</a></li>
+      <li class="breadcrumb-item active"><span class="section-number">2.2. </span>Linux</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/source/2_installation/install_the_package.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="linux">
+<h1><span class="section-number">2.2. </span>Linux<a class="headerlink" href="#linux" title="Link to this heading"></a></h1>
+<section id="installation">
+<h2><span class="section-number">2.2.1. </span>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
+<section id="online-installation">
+<h3><span class="section-number">2.2.1.1. </span>Online installation<a class="headerlink" href="#online-installation" title="Link to this heading"></a></h3>
+<p>We provide <strong>online installation packages</strong> for Python versions <strong>3.9</strong> to <strong>3.13</strong>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3<span class="w"> </span>install<span class="w"> </span>pyorbbecsdk2
+</pre></div>
+</div>
+</section>
+<section id="offline-installation">
+<h3><span class="section-number">2.2.1.2. </span>Offline installation<a class="headerlink" href="#offline-installation" title="Link to this heading"></a></h3>
+<p>We provide <strong>offline installation packages</strong> for Python versions <strong>3.8</strong> to <strong>3.13</strong>.</p>
+<section id="prerequisites">
+<h4><span class="section-number">2.2.1.2.1. </span>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h4>
+<p>Make sure Python is installed on your local system, and that your Python version is 3.8 or higher.</p>
+<p>check your Python version:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>--version
+</pre></div>
+</div>
+</section>
+<section id="download-the-appropriate-whl-package">
+<h4><span class="section-number">2.2.1.2.2. </span>Download the Appropriate .whl Package<a class="headerlink" href="#download-the-appropriate-whl-package" title="Link to this heading"></a></h4>
+<p>Download the .whl installation package that matches your local Python version from the <a class="reference external" href="https://github.com/orbbec/pyorbbecsdk/releases">Python Wrapper Release</a></p>
+<p>For example, if your Python version is 3.11.9, look for a .whl file that matches cp311 and your platform (e.g., Linux x86_64).
+A typical file name will look like:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pyorbbecsdk-2.0.13-cp311-cp311-linux_x86_64.whl
+</pre></div>
+</div>
+</section>
+<section id="install-the-package">
+<h4><span class="section-number">2.2.1.2.3. </span>Install the Package<a class="headerlink" href="#install-the-package" title="Link to this heading"></a></h4>
+<p>Navigate to the directory where you downloaded the .whl file and run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>pyorbbecsdk-2.0.13-cp311-cp311-linux_x86_64.whl
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="verify-the-installation">
+<h2><span class="section-number">2.2.2. </span>Verify the Installation<a class="headerlink" href="#verify-the-installation" title="Link to this heading"></a></h2>
+<p>Check whether the package was installed successfully:</p>
+<ul class="simple">
+<li><p>For <strong>online installation</strong>, use <code class="docutils literal notranslate"><span class="pre">pyorbbecsdk2</span></code>.</p></li>
+<li><p>For <strong>offline installation</strong>, use <code class="docutils literal notranslate"><span class="pre">pyorbbecsdk</span></code>.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>show<span class="w"> </span>pyorbbecsdk<span class="w">     </span><span class="c1">#or pyorbbecsdk2</span>
+</pre></div>
+</div>
+<p>If the output shows a Location: field, the package was installed successfully at that path.
+For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>lijie@lijie-orbbec:~$<span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>show<span class="w"> </span>pyorbbecsdk<span class="w"> </span>
+
+Name:<span class="w"> </span>pyorbbecsdk
+Version:<span class="w"> </span><span class="m">2</span>.0.13
+Summary:<span class="w"> </span>pyorbbecsdk<span class="w"> </span>is<span class="w"> </span>a<span class="w"> </span>python<span class="w"> </span>wrapper<span class="w"> </span><span class="k">for</span><span class="w"> </span>the<span class="w"> </span>OrbbecSDK
+Location:<span class="w"> </span>/home/lijie/.local/lib/python3.11/site-packages
+</pre></div>
+</div>
+<p>In this example, your site-packages path is:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/home/lijie/.local/lib/python3.11/site-packages
+</pre></div>
+</div>
+<p>Inside this directory, you will find the package folder:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/home/lijie/.local/lib/python3.11/site-packages/pyorbbecsdk
+</pre></div>
+</div>
+<p><em>Notes: Regardless of whether you installed <strong>online installation packages</strong> (pyorbbecsdk2) or <strong>offline installation packages</strong> (pyorbbecsdk),the final installed package folder is always named <strong>pyorbbecsdk</strong>.</em></p>
+</section>
+<section id="run-the-example">
+<h2><span class="section-number">2.2.3. </span>Run the Example<a class="headerlink" href="#run-the-example" title="Link to this heading"></a></h2>
+<ul>
+<li><p>Locate the site-packages path
+Use the output from the previous step to find your_site_packages_path.</p></li>
+<li><p>If you are running an example for the first time, you may need to install additional dependencies.
+Install the example dependencies:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>&lt;your_site_packages_path&gt;/pyorbbecsdk/examples/requirements.txt
+</pre></div>
+</div>
+</li>
+<li><p>Run an example</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>pyorbbecsdk
+python3<span class="w"> </span>examples/color.py
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="windows">
+<h1><span class="section-number">2.3. </span>Windows<a class="headerlink" href="#windows" title="Link to this heading"></a></h1>
+<section id="id1">
+<h2><span class="section-number">2.3.1. </span>Installation<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<section id="id2">
+<h3><span class="section-number">2.3.1.1. </span>Online installation<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<p>We provide <strong>online installation packages</strong> for Python versions <strong>3.8</strong> to <strong>3.13</strong>. The installation methods are as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pyorbbecsdk2
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h3><span class="section-number">2.3.1.2. </span>Offline installation<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<p>We provide <strong>offline installation packages</strong> for Python versions <strong>3.8</strong> to <strong>3.13</strong>.</p>
+<section id="id4">
+<h4><span class="section-number">2.3.1.2.1. </span>Prerequisites<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
+<p>Make sure Python is installed on your local system, and that your Python version is 3.8 or higher.</p>
+<p>check your Python version:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>--version
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h4><span class="section-number">2.3.1.2.2. </span>Download the Appropriate .whl Package<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
+<p>Download the .whl installation package that matches your local Python version from the <a class="reference external" href="https://github.com/orbbec/pyorbbecsdk/releases">Python SDK Wrapper Release</a></p>
+<p>For example, if your Python version is 3.11.9, look for a .whl file that matches cp311 and your platform (e.g., win x64).
+A typical file name will look like:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pyorbbecsdk-2.0.13-cp311-cp311-win_amd64.whl
+</pre></div>
+</div>
+</section>
+<section id="id6">
+<h4><span class="section-number">2.3.1.2.3. </span>Install the Package<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
+<p>Navigate to the directory where you downloaded the .whl file and run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>pyorbbecsdk-2.0.13-cp311-cp311-win_amd64.whl
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="id7">
+<h2><span class="section-number">2.3.2. </span>Verify the Installation<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
+<p>Check whether the package was installed successfully:</p>
+<ul class="simple">
+<li><p>For <strong>online installation</strong>, use <code class="docutils literal notranslate"><span class="pre">pyorbbecsdk2</span></code>.</p></li>
+<li><p>For <strong>offline installation</strong>, use <code class="docutils literal notranslate"><span class="pre">pyorbbecsdk</span></code>.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>show<span class="w"> </span>pyorbbecsdk<span class="w">       </span><span class="c1">#or pyorbbecsdk2</span>
+</pre></div>
+</div>
+<p>If the output shows a Location: field, the package was installed successfully at that path.
+For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>C:<span class="se">\U</span>sers<span class="se">\A</span>dministrator&gt;python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>show<span class="w"> </span>pyorbbecsdk
+
+Name:<span class="w"> </span>pyorbbecsdk<span class="w">  </span>
+Version:<span class="w"> </span><span class="m">2</span>.0.13<span class="w">  </span>
+Summary:<span class="w"> </span>pyorbbecsdk<span class="w"> </span>is<span class="w"> </span>a<span class="w"> </span>python<span class="w"> </span>wrapper<span class="w"> </span><span class="k">for</span><span class="w"> </span>the<span class="w"> </span>OrbbecSDK<span class="w">  </span>
+Location:<span class="w"> </span>C:<span class="se">\U</span>sers<span class="se">\A</span>dministrator<span class="se">\A</span>ppData<span class="se">\L</span>ocal<span class="se">\P</span>rograms<span class="se">\P</span>ython<span class="se">\P</span>ython311<span class="se">\L</span>ib<span class="se">\s</span>ite-packages
+</pre></div>
+</div>
+<p>In this example, your site-packages path is:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>C:<span class="se">\U</span>sers<span class="se">\A</span>dministrator<span class="se">\A</span>ppData<span class="se">\L</span>ocal<span class="se">\P</span>rograms<span class="se">\P</span>ython<span class="se">\P</span>ython311<span class="se">\L</span>ib<span class="se">\s</span>ite-packages
+</pre></div>
+</div>
+<p>Inside this directory, you will find the package folder:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>C:<span class="se">\U</span>sers<span class="se">\A</span>dministrator<span class="se">\A</span>ppData<span class="se">\L</span>ocal<span class="se">\P</span>rograms<span class="se">\P</span>ython<span class="se">\P</span>ython311<span class="se">\L</span>ib<span class="se">\s</span>ite-packages<span class="se">\p</span>yorbbecsdk
+</pre></div>
+</div>
+<p><em>Notes: Regardless of whether you installed <strong>online installation packages</strong> (pyorbbecsdk2) or <strong>offline installation packages</strong> (pyorbbecsdk),the final installed package folder is always named <strong>pyorbbecsdk</strong>.</em></p>
+</section>
+<section id="id8">
+<h2><span class="section-number">2.3.3. </span>Run the Example<a class="headerlink" href="#id8" title="Link to this heading"></a></h2>
+<ul>
+<li><p>Locate the site-packages path
+Use the output from the previous step to find your_site_packages_path.</p></li>
+<li><p>If you are running an example for the first time, you may need to install additional dependencies.
+Install the example dependencies:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </span>&lt;your_site_packages_path&gt;/pyorbbecsdk/shared/install_udev_rules.sh
+sudo<span class="w"> </span>&lt;your_site_packages_path&gt;/pyorbbecsdk/shared/install_udev_rules.sh
+sudo<span class="w"> </span>udevadm<span class="w"> </span>control<span class="w"> </span>--reload-rules<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>udevadm<span class="w"> </span>trigger
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>&lt;your_site_packages_path&gt;/pyorbbecsdk/examples/requirements.txt
+</pre></div>
+</div>
+</li>
+<li><p>Run an example</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>pyorbbecsdk
+python<span class="w"> </span>examples/color.py
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="registration_script.html" class="btn btn-neutral float-left" title="2.1. Registration script (required)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="build_the_package.html" class="btn btn-neutral float-right" title="2.4. Build from Source" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, ORBBEC INC. www.orbbec.com..
+      <span class="lastupdated">Last updated on 2026-01-20 15:56:16.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
