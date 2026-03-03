@@ -212,37 +212,23 @@ if __name__ == "__main__":
             raise ValueError("Orbbec 彩色帧转换失败（frame_to_bgr_image 返回 None）。")
 
         # ====== ✅ 模型推理设置：只做一次（关键）======
-
         # 1) eval()：省显存更快
 
         if hasattr(yolo, "net"):
 
             yolo.net.eval()
-
             # 2) CUDA + FP16：只做一次（不要在 detect_orbbec_image 每帧 half）
-
             if getattr(yolo, "cuda", False):
-
                 try:
-
                     yolo.net = yolo.net.cuda()
-
                 except Exception:
-
                     pass
-
                 try:
-
                     yolo.net.half()
-
                     print("[YOLO] FP16 enabled (model.half())")
-
                 except Exception as e:
-
                     print("[YOLO] FP16 enable failed, fallback FP32. err =", repr(e))
-
         # ====== 视频保存器（沿用你的逻辑）======
-
         out = None
 
         if video_save_path != "":

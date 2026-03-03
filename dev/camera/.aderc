@@ -13,6 +13,6 @@ export ADE_DOCKER_RUN_ARGS="--cap-add=SYS_PTRACE \
  -e DISPLAY \
 "
 
-export ADE_IMAGES="openorbbecsdk-env:aarch64_ros2_orbbec_20260212"
+export ADE_IMAGES="openorbbecsdk-env:aarch64_ros2_orbbec_sdk_latest"
 
 

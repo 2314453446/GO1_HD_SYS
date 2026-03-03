@@ -262,3 +262,173 @@ PY
 ps -eo pid,user,comm,rss --sort=-rss | head -n 20
 python ./predict.py 
 exit
+cd third_party/yolov7_pytorch/
+python ./predict.py 
+python - <<'PY'
+import os, torch
+print("torch:", torch.__version__)
+print("torch cuda:", torch.version.cuda)
+print("cudnn version:", torch.backends.cudnn.version())
+print("cuda available:", torch.cuda.is_available())
+if torch.cuda.is_available():
+    print("gpu:", torch.cuda.get_device_name(0))
+print("LD_LIBRARY_PATH:", os.environ.get("LD_LIBRARY_PATH",""))
+PY
+
+python - <<'PY'
+import torch
+print("cuda:", torch.version.cuda, "cudnn:", torch.backends.cudnn.version())
+x = torch.randn(1,3,640,640, device='cuda')
+w = torch.randn(32,3,3,3, device='cuda')
+y = torch.nn.functional.conv2d(x, w, None, 1, 1)
+print("ok", y.shape)
+PY
+
+python - <<'PY'
+import torch
+torch.backends.cudnn.enabled = False
+x = torch.randn(1,3,640,640, device='cuda')
+w = torch.randn(32,3,3,3, device='cuda')
+y = torch.nn.functional.conv2d(x, w, None, 1, 1)
+print("ok(no cudnn)", y.shape)
+PY
+
+python - <<'PY'
+import torch, torch._C
+print(torch._C.__file__)
+PY
+
+python -m pip uninstall -y   nvidia-cudnn-cu12 nvidia-cublas-cu12 nvidia-cuda-runtime-cu12   nvidia-cuda-nvrtc-cu12 nvidia-cusparse-cu12 nvidia-nccl-cu12   || true
+apt-cache search libcudnn | head
+dpkg -l | grep -i cudnn || true
+sudo apt-get update
+# 下面这行用你系统里实际存在的包名替换（常见是 libcudnn9 / libcudnn9-dev）
+sudo apt-get install --reinstall -y libcudnn9 libcudnn9-dev
+sudo ldconfig
+python - <<'PY'
+import torch, torch._C
+print(torch._C.__file__)
+PY
+
+ldd $(python - <<'PY'
+import torch, torch._C
+print(torch._C.__file__)
+PY
+) | egrep "cudnn|cublas|cudart|cuda|nvrtc" | sort
+readlink -f /lib/aarch64-linux-gnu/libcudnn.so.9
+ls -l /lib/aarch64-linux-gnu/libcudnn.so.9*
+strings /lib/aarch64-linux-gnu/libcudnn.so.9 | grep -E "CUDNN_MAJOR|CUDNN_MINOR|CUDNN_PATCHLEVEL|cudnn_version" | head -n 20 || true
+ldconfig -p | grep -E "libcudnn\.so\.9" -n
+sudo apt-get install --reinstall -y libcudnn9-cuda-12 libcudnn9-dev-cuda-12
+sudo ldconfig
+readlink -f /lib/aarch64-linux-gnu/libcudnn.so.9
+ls -l /lib/aarch64-linux-gnu/libcudnn.so.9*
+ldconfig -p | grep libcudnn.so.9
+python ./predict.py 
+ls -l /lib/aarch64-linux-gnu/libcudnn* /usr/lib/aarch64-linux-gnu/libcudnn* 2>/dev/null | head -n 200
+dpkg -S /lib/aarch64-linux-gnu/libcudnn.so.9.19.0
+dpkg -l | grep -E "libcudnn9|nvidia-cudnn9" || true
+apt-cache policy libcudnn9-cuda-12 libcudnn9-dev-cuda-12 | sed -n '1,160p'
+sudo apt-get purge -y "libcudnn9*" "nvidia-cudnn9*" || true
+sudo apt-get autoremove -y
+sudo ldconfig
+sudo apt-get update
+sudo apt-get install -y --reinstall   libcudnn9-cuda-12   libcudnn9-dev-cuda-12   libcudnn9-headers-cuda-12   libcudnn9-samples
+sudo ldconfig
+python ./predict.py 
+python - <<'PY'
+import torch
+print(torch.backends.cudnn.version())
+PY
+
+ls -l /lib/aarch64-linux-gnu/libcudnn* /usr/lib/aarch64-linux-gnu/libcudnn* 2>/dev/null | head -n 200
+python - <<'PY'
+import torch
+print(torch.backends.cudnn.version())
+PY
+
+python predict.py 
+which xdg-open || echo "no xdg-open"
+cd /tmp/
+ll
+ego tmpfvg42ksw.PNG 
+feh tmpfvg42ksw.PNG 
+file tmpfvg42ksw.PNG
+ls -lh tmpfvg42ksw.PNG
+python3 - <<'PY'
+import struct
+p="tmpfvg42ksw.PNG"
+with open(p,'rb') as f:
+    sig=f.read(8)
+    print("sig",sig)
+    if sig != b"\x89PNG\r\n\x1a\n":
+        print("NOT a PNG signature")
+    # 读 IHDR chunk
+    ln=struct.unpack(">I", f.read(4))[0]
+    typ=f.read(4)
+    data=f.read(ln)
+    print("chunk", typ, "len", ln)
+    if typ==b'IHDR' and ln==13:
+        w,h,bd,ct,cm,fl,il = struct.unpack(">IIBBBBB", data)
+        print("W H bitdepth colortype:", w,h,bd,ct)
+PY
+
+pngcheck -v tmpfvg42ksw.PNG | head -n 80
+sudo apt-get update
+sudo apt-get install -y pngcheck
+pngcheck -v tmpfvg42ksw.PNG | head -n 120
+feh tmpfvg42ksw.PNG 
+cd
+ll
+cd third_party/yolov7_pytorch/
+pwd
+cd  
+ll
+cd ros_ws/
+ll
+cd src/camera_perception_pkg/
+python predict_weed.py 
+[A
+python predict_weed.py 
+exit
+cd ros_ws/src/camera_perception_pkg/
+python predict_weed.py 
+which python3
+python3 -m site
+python3 -m pip install pandas
+sudo python predict_weed.py 
+sudo python3 -m pip install pandas
+python3 predict_weed.py 
+cd ~/third_party/pyorbbecsdk/examples/
+python color.py 
+exit
+cd third_party/yolov7_pytorch/
+cd ~/ros_ws/
+Ll
+ll
+cd src/
+ll
+cd camera_perception_pkg/
+python predict_weed.py 
+exit
+cd ~/ros_ws/src/camera_perception_pkg/
+python predict_weed.py 
+docker images
+exit
+which python
+pip list
+which python3
+pip list
+exit
+cd ~/ros_ws/src/camera_perception_pkg/
+python predict_weed.py 
+exit
+cd ros_ws/src/camera_perception_pkg/
+python predict_weed.py 
+exit
+cd ros_ws/src/camera_perception_pkg/
+python predict_weed.py \
+python predict_weed.py 
+python3 -c "import pyorbbecsdk"
+pip3 list | grep -i orbbec
+exit
