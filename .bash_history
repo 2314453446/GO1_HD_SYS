@@ -432,3 +432,11 @@ python predict_weed.py
 python3 -c "import pyorbbecsdk"
 pip3 list | grep -i orbbec
 exit
+cd ros_ws/src/camera_perception_pkg/
+python predict_weed.py 
+exit
+ros2 topic list
+rviz2
+ros2 node list
+ros2 node info /camera/camera
+exit

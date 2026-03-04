@@ -2,6 +2,16 @@ from pathlib import Path
 import os
 import sys
 
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import Image as ROSImage
+from cv_bridge import CvBridge
+# 新增：同步工具
+from message_filters import Subscriber, ApproximateTimeSynchronizer
+from sensor_msgs.msg import PointCloud2
+from sensor_msgs_py import point_cloud2 as pc2
+import threading
+from sensor_msgs.msg import CameraInfo
 
 # A) 把“当前脚本所在目录”加到 sys.path（保证能 import utils.py）
 THIS_DIR = Path(__file__).resolve().parent
@@ -27,6 +37,234 @@ from PIL import Image
 
 from yolo import YOLO, YOLO_ONNX
 
+
+class RosOrbbecYolo(Node):
+    def __init__(self, yolo, video_save_path="", video_fps=25, count=False):
+        super().__init__('yolo_ros_node')
+
+        self.bridge = CvBridge()
+        self.yolo = yolo
+        self.count = count
+        self.out = None
+        self.fps = 0.0
+
+        self.video_save_path = video_save_path
+        self.video_fps = video_fps
+
+        # camera_info 缓存（color 内参，因 depth 已 registration 到 color）
+        self._info_lock = threading.Lock()
+        self._color_info = None  # sensor_msgs/CameraInfo
+
+        # ⭐ 模型只处理一次（沿用你原逻辑）
+        if hasattr(self.yolo, "net"):
+            self.yolo.net.eval()
+            if getattr(self.yolo, "cuda", False):
+                try:
+                    self.yolo.net = self.yolo.net.cuda()
+                except Exception:
+                    pass
+                try:
+                    self.yolo.net.half()
+                    print("[YOLO] FP16 enabled")
+                except Exception as e:
+                    print("[YOLO] FP16 fallback:", e)
+
+        # ⭐⭐ 订阅 camera_info（color）
+        self.info_sub = self.create_subscription(
+            CameraInfo,
+            '/camera/color/camera_info',
+            self.info_callback,
+            10
+        )
+
+        # ⭐⭐⭐ RGB + Depth 同步订阅
+        self.rgb_sub = Subscriber(self, ROSImage, '/camera/color/image_raw')
+        self.depth_sub = Subscriber(self, ROSImage, '/camera/depth/image_raw')
+
+        self.sync = ApproximateTimeSynchronizer(
+            [self.rgb_sub, self.depth_sub],
+            queue_size=10,
+            slop=0.05
+        )
+        self.sync.registerCallback(self.callback)
+
+        self.get_logger().info("ROS YOLO node started (RGB+Depth synced + CameraInfo cached).")
+
+    def info_callback(self, msg: CameraInfo):
+        with self._info_lock:
+            self._color_info = msg
+
+    def _get_k(self):
+        """
+        取相机内参 (fx, fy, cx0, cy0)。取不到返回 None。
+        """
+        with self._info_lock:
+            info = self._color_info
+
+        if info is None:
+            return None
+
+        fx = float(info.k[0])
+        fy = float(info.k[4])
+        cx0 = float(info.k[2])
+        cy0 = float(info.k[5])
+
+        if fx <= 0 or fy <= 0:
+            return None
+
+        return fx, fy, cx0, cy0
+
+    def uv_list_to_xyz_list(self, uv_list, depth_m, use_median=True, win=1):
+        """
+        把一组像素点 (u,v) 转换成相机坐标系 (x,y,z)（单位 m）。
+        - uv_list: [(u,v), ...]
+        - depth_m: HxW 的深度图（单位 m），且与 RGB 已 registration 对齐
+        - use_median: 是否在 (u,v) 周围取中位数深度（更稳）
+        - win: 半窗口大小；win=1 => 3x3；win=2 => 5x5
+
+        返回：
+        - xyz_list: 与 uv_list 等长，元素为 (x,y,z) 或 None
+        """
+        k = self._get_k()
+        if k is None:
+            return [None] * len(uv_list)
+
+        fx, fy, cx0, cy0 = k
+        H, W = depth_m.shape[:2]
+
+        def get_depth(u, v):
+            if u < 0 or u >= W or v < 0 or v >= H:
+                return float('nan')
+
+            if not use_median:
+                return float(depth_m[v, u])
+
+            u0 = max(0, u - win)
+            u1 = min(W, u + win + 1)
+            v0 = max(0, v - win)
+            v1 = min(H, v + win + 1)
+
+            patch = depth_m[v0:v1, u0:u1].astype(np.float32)
+            patch = patch[np.isfinite(patch)]
+            patch = patch[patch > 0]
+
+            if patch.size == 0:
+                return float('nan')
+
+            return float(np.median(patch))
+
+        xyz_list = []
+
+        for (u, v) in uv_list:
+            u = int(u)
+            v = int(v)
+
+            z = get_depth(u, v)
+
+            if (not np.isfinite(z)) or z <= 0:
+                xyz_list.append(None)
+                continue
+
+            x = (u - cx0) * z / fx
+            y = (v - cy0) * z / fy
+            xyz_list.append((float(x), float(y), float(z)))
+
+        return xyz_list
+
+    def callback(self, rgb_msg, depth_msg):
+        t1 = time.time()
+
+        # ===== ROS → OpenCV (RGB) =====
+        frame = self.bridge.imgmsg_to_cv2(rgb_msg, 'bgr8')
+        if frame is None:
+            return
+
+        # ===== ROS → OpenCV (Depth) =====
+        if getattr(depth_msg, "encoding", "") in ('32FC1', '32FC'):
+            depth_m = self.bridge.imgmsg_to_cv2(depth_msg, '32FC1')  # meters
+        elif getattr(depth_msg, "encoding", "") in ('16UC1', 'mono16'):
+            depth_u16 = self.bridge.imgmsg_to_cv2(depth_msg, '16UC1')  # millimeters
+            depth_m = depth_u16.astype(np.float32) / 1000.0
+        else:
+            depth_any = self.bridge.imgmsg_to_cv2(depth_msg, depth_msg.encoding)
+            depth_m = depth_any.astype(np.float32)
+
+        if depth_m is None:
+            return
+
+        # ===== BGR→RGB→PIL（保持你原流程）=====
+        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        pil = Image.fromarray(rgb)
+
+        # 需要你在 yolo.py 里实现 return_uv 参数：
+        #   return_uv=False -> return image
+        #   return_uv=True  -> return image, uv_list
+        pil_out, uv_list = self.yolo.detect_orbbec_image(pil, count=self.count, return_uv=True)
+        frame = cv2.cvtColor(np.asarray(pil_out), cv2.COLOR_RGB2BGR)
+
+        # ===== 把 YOLO 检测到的 uv_list 映射成 xyz_list =====
+        xyz_list = self.uv_list_to_xyz_list(uv_list, depth_m, use_median=True, win=1)
+
+        # ===== 可视化：画中心点 + 标注 3D 坐标（最多显示前 N 个，避免画面太乱）=====
+        max_show = 10
+        for i, (uv, xyz) in enumerate(zip(uv_list, xyz_list)):
+            if i >= max_show:
+                break
+
+            u, v = int(uv[0]), int(uv[1])
+
+            # 越界保护
+            H, W = depth_m.shape[:2]
+            if u < 0 or u >= W or v < 0 or v >= H:
+                continue
+
+            cv2.circle(frame, (u, v), 4, (0, 0, 255), -1)
+
+            if xyz is None:
+                text = "xyz=nan"
+            else:
+                x, y, z = xyz
+                text = f"({x:.2f},{y:.2f},{z:.2f})m"
+
+            # 文本位置稍微偏移，避免压在点上
+            tx = min(u + 6, frame.shape[1] - 1)
+            ty = max(v - 6, 0)
+
+            cv2.putText(
+                frame, text, (tx, ty),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1
+            )
+
+        # ===== FPS =====
+        self.fps = (self.fps + (1.0 / (time.time() - t1))) / 2.0
+        print("fps= %.2f" % self.fps)
+
+        frame = cv2.putText(
+            frame, f"fps= {self.fps:.2f}", (0, 40),
+            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2
+        )
+
+        # ===== 显示 =====
+        cv2.imshow("video", frame)
+
+        depth_vis = depth_m.copy()
+        maxv = np.nanmax(depth_vis)
+        if maxv > 0:
+            depth_vis = depth_vis / maxv
+        cv2.imshow("depth", depth_vis)
+
+        cv2.waitKey(1)
+
+        # ===== 视频保存 =====
+        if self.video_save_path != "":
+            if self.out is None:
+                fourcc = cv2.VideoWriter_fourcc(*'XVID')
+                size = (frame.shape[1], frame.shape[0])
+                self.out = cv2.VideoWriter(
+                    self.video_save_path, fourcc, self.video_fps, size
+                )
+            self.out.write(frame)
+
 if __name__ == "__main__":
     # ----------------------------------------------------------------------------------------------------------#
     #   mode用于指定测试的模式：
@@ -39,7 +277,7 @@ if __name__ == "__main__":
     #   'export_onnx'       表示将模型导出为onnx，需要pytorch1.7.1以上。
     #   'predict_onnx'      表示利用导出的onnx模型进行预测，相关参数的修改在yolo.py_423行左右处的YOLO_ONNX
     # ----------------------------------------------------------------------------------------------------------#
-    mode = "orbbec_video"
+    mode = "ros_image"
     # -------------------------------------------------------------------------#
     #   crop                指定了是否在单张图片预测后对目标进行截取
     #   count               指定了是否进行目标的计数
@@ -165,149 +403,40 @@ if __name__ == "__main__":
 
 
 
-    elif mode == "orbbec_video":
 
-        # ====== Orbbec 彩色流替代 cv2.VideoCapture ======
+    elif mode == "ros_image":
 
-        from pyorbbecsdk import Pipeline, Config, OBSensorType, OBFormat, OBError, VideoStreamProfile
+        rclpy.init()
 
-        from orbbec_utils import frame_to_bgr_image
+        node = RosOrbbecYolo(
 
-        pipeline = Pipeline()
+            yolo,
 
-        config = Config()
+            video_save_path=video_save_path,
 
-        profile_list = pipeline.get_stream_profile_list(OBSensorType.COLOR_SENSOR)
+            video_fps=video_fps,
 
-        try:
+            count=count
 
-            color_profile: VideoStreamProfile = profile_list.get_video_stream_profile(
-
-                640, 0, OBFormat.RGB, 30
-
-            )
-
-        except OBError:
-
-            color_profile = profile_list.get_default_video_stream_profile()
-
-        config.enable_stream(color_profile)
-
-        pipeline.start(config)
-
-        # 读取第一帧用于初始化保存器尺寸
-
-        frames = pipeline.wait_for_frames(1000)
-
-        if frames is None or frames.get_color_frame() is None:
-            pipeline.stop()
-
-            raise ValueError("未能正确读取 Orbbec 彩色相机帧，请检查相机连接/权限/是否被占用。")
-
-        first_bgr = frame_to_bgr_image(frames.get_color_frame())
-
-        if first_bgr is None:
-            pipeline.stop()
-
-            raise ValueError("Orbbec 彩色帧转换失败（frame_to_bgr_image 返回 None）。")
-
-        # ====== ✅ 模型推理设置：只做一次（关键）======
-        # 1) eval()：省显存更快
-
-        if hasattr(yolo, "net"):
-
-            yolo.net.eval()
-            # 2) CUDA + FP16：只做一次（不要在 detect_orbbec_image 每帧 half）
-            if getattr(yolo, "cuda", False):
-                try:
-                    yolo.net = yolo.net.cuda()
-                except Exception:
-                    pass
-                try:
-                    yolo.net.half()
-                    print("[YOLO] FP16 enabled (model.half())")
-                except Exception as e:
-                    print("[YOLO] FP16 enable failed, fallback FP32. err =", repr(e))
-        # ====== 视频保存器（沿用你的逻辑）======
-        out = None
-
-        if video_save_path != "":
-            fourcc = cv2.VideoWriter_fourcc(*'XVID')
-
-            size = (first_bgr.shape[1], first_bgr.shape[0])  # (w, h)
-
-            out = cv2.VideoWriter(video_save_path, fourcc, video_fps, size)
-
-        fps = 0.0
+        )
 
         try:
 
-            while True:
-
-                t1 = time.time()
-
-                frames = pipeline.wait_for_frames(100)
-
-                if frames is None:
-                    continue
-
-                color_frame = frames.get_color_frame()
-
-                if color_frame is None:
-                    continue
-
-                frame = frame_to_bgr_image(color_frame)  # OpenCV BGR
-
-                if frame is None:
-                    continue
-
-                # ====== BGR->RGB->PIL->YOLO->BGR（保留你的流程，但减少复制）======
-
-                rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-                # rgb 本来就是 uint8，不要再 np.uint8(rgb) 复制
-
-                pil = Image.fromarray(rgb)
-
-                # count=True 非常慢（print + 统计 + CSV），建议用变量控制
-
-                pil_out = yolo.detect_orbbec_image(pil, count=count)
-
-                # np.asarray 通常比 np.array 少一次复制
-
-                frame = cv2.cvtColor(np.asarray(pil_out), cv2.COLOR_RGB2BGR)
-
-                fps = (fps + (1.0 / (time.time() - t1))) / 2.0
-
-                print("fps= %.2f" % fps)
-
-                frame = cv2.putText(
-
-                    frame, "fps= %.2f" % fps, (0, 40),
-
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2
-
-                )
-
-                cv2.imshow("video", frame)
-
-                c = cv2.waitKey(1) & 0xff
-
-                if out is not None:
-                    out.write(frame)
-
-                if c == 27:
-                    break
+            rclpy.spin(node)
 
 
         finally:
 
-            pipeline.stop()
+            if node.out is not None:
+                node.out.release()
 
-            if out is not None:
-                out.release()
+            node.destroy_node()
+
+            rclpy.shutdown()
 
             cv2.destroyAllWindows()
+
+
 
     elif mode == "fps":
         img = Image.open(fps_image_path)
