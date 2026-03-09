@@ -12,6 +12,9 @@ from sensor_msgs.msg import PointCloud2
 from sensor_msgs_py import point_cloud2 as pc2
 import threading
 from sensor_msgs.msg import CameraInfo
+from std_msgs.msg import ColorRGBA
+from visualization_msgs.msg import Marker
+from geometry_msgs.msg import Point
 
 # A) 把“当前脚本所在目录”加到 sys.path（保证能 import utils.py）
 THIS_DIR = Path(__file__).resolve().parent
@@ -88,7 +91,23 @@ class RosOrbbecYolo(Node):
         )
         self.sync.registerCallback(self.callback)
 
-        self.get_logger().info("ROS YOLO node started (RGB+Depth synced + CameraInfo cached).")
+        # ⭐⭐⭐ 发布 RViz Marker（3D 点）
+        self.marker_pub = self.create_publisher(
+            Marker,
+            "/weed_centers_marker",
+            10
+        )
+        self.marker_ns = "weed_centers"
+        self.marker_id = 0
+        # 发布 RViz Marker（球 + 竖直线）
+        # 发布 RViz Marker（球 + 竖直线）
+        self.sphere_pub = self.create_publisher(Marker, "/weed_spheres_marker", 10)
+        self.stem_pub   = self.create_publisher(Marker, "/weed_stems_marker",   10)
+
+        # 与 Orbbec 点云/光学坐标系一致（你 echo points 里看到的就是这个）
+        self.marker_frame = "camera_color_optical_frame"
+
+        self.get_logger().info("ROS YOLO node started (RGB+Depth synced + CameraInfo cached + Marker pub).")
 
     def info_callback(self, msg: CameraInfo):
         with self._info_lock:
@@ -171,6 +190,87 @@ class RosOrbbecYolo(Node):
 
         return xyz_list
 
+
+    def _publish_marker(self, xyz_list):
+        # 过滤有效点
+        pts = []
+        for xyz in xyz_list:
+            if xyz is None:
+                continue
+            x, y, z = xyz
+            if (not np.isfinite(x)) or (not np.isfinite(y)) or (not np.isfinite(z)) or z <= 0:
+                continue
+            pts.append((float(x), float(y), float(z)))
+
+        now = self.get_clock().now().to_msg()
+
+        # 近红远蓝：按 z 归一化
+        if pts:
+            zs = [p[2] for p in pts]
+            zmin = float(min(zs))
+            zmax = float(max(zs))
+            if zmax - zmin < 1e-6:
+                zmax = zmin + 1e-6
+        else:
+            zmin, zmax = 0.0, 1.0
+
+        def z_to_color(z):
+            t = (z - zmin) / (zmax - zmin)  # 0近->1远
+            t = 0.0 if t < 0 else (1.0 if t > 1 else t)
+            c = ColorRGBA()
+            c.r = 1.0 - t
+            c.g = 0.0
+            c.b = t
+            c.a = 0.85
+            return c
+
+        # ---------- 球：SPHERE_LIST ----------
+        spheres = Marker()
+        spheres.header.frame_id = self.marker_frame
+        spheres.header.stamp = now
+        spheres.ns = "weed_spheres"
+        spheres.id = 0
+        spheres.type = Marker.SPHERE_LIST
+        spheres.action = Marker.ADD
+        spheres.scale.x = 0.04
+        spheres.scale.y = 0.04
+        spheres.scale.z = 0.04
+        spheres.points = []
+        spheres.colors = []
+
+        for (x, y, z) in pts:
+            p = Point(); p.x, p.y, p.z = x, y, z
+            spheres.points.append(p)
+            spheres.colors.append(z_to_color(z))
+
+        self.sphere_pub.publish(spheres)
+
+        # ---------- 竖直杆：LINE_LIST ----------
+        stems = Marker()
+        stems.header.frame_id = self.marker_frame
+        stems.header.stamp = now
+        stems.ns = "weed_stems"
+        stems.id = 0
+        stems.type = Marker.LINE_LIST
+        stems.action = Marker.ADD
+        stems.scale.x = 0.01
+        stems.points = []
+        stems.colors = []
+
+        L = 0.12
+        for (x, y, z) in pts:
+            p0 = Point(); p0.x, p0.y, p0.z = x, y, z
+            p1 = Point(); p1.x, p1.y, p1.z = x, y+ L, z 
+            stems.points.extend([p0, p1])
+            c = z_to_color(z)
+            stems.colors.extend([c, c])
+
+        self.stem_pub.publish(stems)
+
+
+
+
+
     def callback(self, rgb_msg, depth_msg):
         t1 = time.time()
 
@@ -205,7 +305,10 @@ class RosOrbbecYolo(Node):
         # ===== 把 YOLO 检测到的 uv_list 映射成 xyz_list =====
         xyz_list = self.uv_list_to_xyz_list(uv_list, depth_m, use_median=True, win=1)
 
-        # ===== 可视化：画中心点 + 标注 3D 坐标（最多显示前 N 个，避免画面太乱）=====
+        # ===== 发布 RViz Marker =====
+        self._publish_marker(xyz_list)
+
+        # ===== 可视化：画中心点 + 标注 3D 坐标（最多显示前 N 个）=====
         max_show = 10
         for i, (uv, xyz) in enumerate(zip(uv_list, xyz_list)):
             if i >= max_show:
@@ -226,7 +329,6 @@ class RosOrbbecYolo(Node):
                 x, y, z = xyz
                 text = f"({x:.2f},{y:.2f},{z:.2f})m"
 
-            # 文本位置稍微偏移，避免压在点上
             tx = min(u + 6, frame.shape[1] - 1)
             ty = max(v - 6, 0)
 

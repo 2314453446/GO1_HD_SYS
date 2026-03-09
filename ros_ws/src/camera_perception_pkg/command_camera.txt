@@ -1,8 +1,9 @@
-# 容器内ros开启相机数据流
-ros2 launch orbbec_camera orbbec_camera.launch.py
+# 容器内ros开启相机数据流,
+ros2 launch orbbec_camera gemini_330_series.launch.py enable_colored_point_cloud:=true
 # 宿主机开启rviz2
 rviz2
 # 容器内运行检测算法
 cd ros_ws/src/camera_perception_pkg
 python predict_weed.py
+#
 
