@@ -1,5 +1,8 @@
-# 容器内ros开启相机数据流,
-ros2 launch orbbec_camera gemini_330_series.launch.py enable_colored_point_cloud:=true
+# 相机自动校正
+cd ~ros_ws/src/camera_perception_pkg/launch
+python camera_axle_auto_cla.py
+# 相机启动脚本(二次封装）
+python camera_sys.launch.py
 # 宿主机开启rviz2
 rviz2
 # 容器内运行检测算法
