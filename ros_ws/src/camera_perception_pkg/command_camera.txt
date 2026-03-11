@@ -2,9 +2,8 @@
 cd ~ros_ws/src/camera_perception_pkg/launch
 python camera_axle_auto_cla.py
 # 相机启动脚本(二次封装）
-python camera_sys.launch.py
-# 宿主机开启rviz2
-rviz2
+ros2 launch ./camera_sys.launch.py
+
 # 容器内运行检测算法
 cd ros_ws/src/camera_perception_pkg
 python predict_weed.py
