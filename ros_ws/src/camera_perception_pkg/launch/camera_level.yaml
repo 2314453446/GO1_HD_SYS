@@ -2,9 +2,9 @@ child_frame: camera_level_frame
 parent_frame: camera_link
 rotation:
 - 0.0
-- -0.25670513625753755
+- -0.25441325722081837
 - 0.0
-- 0.9664897687089082
+- 0.967095597420593
 translation:
 - 0.0
 - 0.0

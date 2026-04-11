@@ -1,0 +1,12 @@
+child_frame: camera_link
+parent_frame: base_link
+rotation:
+- 0.0
+- 0.0
+- 0.0
+- 1.0
+translation:
+#xyz m
+- 0.1775
+- 0.024
+- -0.135

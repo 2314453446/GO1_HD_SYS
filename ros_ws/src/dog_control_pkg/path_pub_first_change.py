@@ -21,6 +21,7 @@ from message_filters import Subscriber, ApproximateTimeSynchronizer
 
 import tf2_ros
 from tf2_ros import TransformException
+import math
 
 from nav_msgs.msg import Odometry
 
@@ -74,7 +75,8 @@ class FurrowPathNode(Node):
 
         # ---------------- Target frame ----------------
         self.target_frame = "camera_level_frame"             # 重力对齐坐标系；最终路径/目标点都发布到该坐标系下
-
+        # self.target_frame = "odom"
+         
         # ---------------- Perception params ----------------
         self.depth_min = 0.2   # 有效最小深度（m），小于该值的深度视为无效
         self.depth_max = 5.0   # 有效最大深度（m），大于该值的深度视为无效
@@ -211,6 +213,16 @@ class FurrowPathNode(Node):
         self.get_logger().info("FurrowPathNode started.")
         self.get_logger().info(f"Gravity-aligned target frame: {self.target_frame}")
 
+        # ----------------odom ----------------
+        # self.target_frame = "odom"  # 强烈注意：把这里改成 odom！因为我们要发布 odom 下的路径了
+        
+        # 新增变量保存最新的 odom
+        self.latest_odom_x = 0.0
+        self.latest_odom_y = 0.0
+        self.latest_odom_yaw = 0.0
+
+        # 新增对 /odom 的订阅
+        self.create_subscription(Odometry, '/odom', self.odom_cb, 10)
 
     # ---------------- Color cache ----------------
     def cb_color(self, msg: Image):
@@ -277,26 +289,56 @@ class FurrowPathNode(Node):
         self.pub_conf.publish(Float32(data=float(conf)))
 
         # ---- raw guidance line in camera_level_frame ----
+        # raw_pts = self.uv_to_3d_level(
+        #     D, u_list, v_list, self.depth_k, R, t, step=1
+        # )
+
+        # stable_pts = self.update_stable_path(raw_pts, conf)
+
+        # out_header = depth_msg.header
+        # out_header.frame_id = self.target_frame
+
+        # self.pub_path.publish(self.make_path(out_header, stable_pts))
+        # self.pub_mk.publish(self.make_marker(out_header, stable_pts))
+
+        # heading = self.compute_heading(stable_pts)
+        # if heading is not None:
+        #     self.pub_heading.publish(Float32(data=float(heading)))
+
+        # target_pt = self.compute_lookahead_target(stable_pts, self.lookahead_distance)
+        # if target_pt is not None:
+        #     target_pt = self.update_stable_target(target_pt)
+        #     self.pub_target_mk.publish(self.make_target_marker(out_header, target_pt))
+        # ---- raw guidance line in camera_level_frame ----
         raw_pts = self.uv_to_3d_level(
             D, u_list, v_list, self.depth_k, R, t, step=1
         )
 
         stable_pts = self.update_stable_path(raw_pts, conf)
 
+        # 【核心修改点：提前进行全局坐标系转换】
+        stable_pts_odom = [self.transform_to_odom(x, y, z) for x, y, z in stable_pts]
+
         out_header = depth_msg.header
-        out_header.frame_id = self.target_frame
+        out_header.frame_id = "odom"  # 声明发布的话题属于 odom 坐标系
 
-        self.pub_path.publish(self.make_path(out_header, stable_pts))
-        self.pub_mk.publish(self.make_marker(out_header, stable_pts))
+        # 注意：现在传给 make_path 和 make_marker 的已经是 odom 下的全局点了
+        self.pub_path.publish(self.make_path(out_header, stable_pts_odom))
+        self.pub_mk.publish(self.make_marker(out_header, stable_pts_odom))
 
+        # heading 计算仍使用局部 stable_pts，因为控制通常需要局部航向偏差
         heading = self.compute_heading(stable_pts)
         if heading is not None:
             self.pub_heading.publish(Float32(data=float(heading)))
 
+        # 前视目标点计算仍基于局部路径点以保证时序稳定性
         target_pt = self.compute_lookahead_target(stable_pts, self.lookahead_distance)
         if target_pt is not None:
             target_pt = self.update_stable_target(target_pt)
-            self.pub_target_mk.publish(self.make_target_marker(out_header, target_pt))
+            # 发布前把 target_pt 也转到 odom
+            tx, ty, tz = self.transform_to_odom(target_pt[0], target_pt[1], target_pt[2])
+            target_pt_odom = np.array([tx, ty, tz], dtype=np.float64)
+            self.pub_target_mk.publish(self.make_target_marker(out_header, target_pt_odom))
 
     # ---------------- Stability logic ----------------
     def update_stable_path(self, raw_pts: List[Tuple[float, float, float]], conf: float) -> List[Tuple[float, float, float]]:
@@ -667,18 +709,96 @@ class FurrowPathNode(Node):
             pts_out.append((float(p2[0]), float(p2[1]), float(p2[2])))
         return pts_out
 
+    def odom_cb(self, msg: Odometry):
+        self.latest_odom_x = msg.pose.pose.position.x
+        self.latest_odom_y = msg.pose.pose.position.y
+        
+        # 将四元数转为 yaw
+        q = msg.pose.pose.orientation
+        self.latest_odom_yaw = math.atan2(
+            2.0 * (q.w * q.z + q.x * q.y),
+            1.0 - 2.0 * (q.y * q.y + q.z * q.z)
+        )
+
     # ---------------- Path / Marker ----------------
+    # def make_path(self, header, pts: List[Tuple[float, float, float]]) -> Path:
+    #     path = Path()
+    #     path.header = header
+    #     for (x, y, z) in pts:
+    #         ps = PoseStamped()
+    #         ps.header = header
+    #         ps.pose.position.x = float(x)
+    #         ps.pose.position.y = float(y)
+    #         ps.pose.position.z = float(z)
+    #         ps.pose.orientation.w = 1.0
+    #         path.poses.append(ps)
+    #     return path
+    def transform_to_odom(self, x: float, y: float, z: float) -> Tuple[float, float, float]:
+        """将 camera_level_frame 下的点转换到 odom 坐标系"""
+        # 1. 转换到 base_link (基于你的固定外参平移)
+        base_x = x + 0.1775
+        base_y = y + 0.024
+        base_z = z - 0.0135
+
+        # 2. 转换到 odom (旋转 + 平移)
+        ox = self.latest_odom_x
+        oy = self.latest_odom_y
+        oyaw = self.latest_odom_yaw
+        cos_th = math.cos(oyaw)
+        sin_th = math.sin(oyaw)
+
+        global_x = ox + base_x * cos_th - base_y * sin_th
+        global_y = oy + base_x * sin_th + base_y * cos_th
+        global_z = base_z 
+
+        return (global_x, global_y, global_z)
+
     def make_path(self, header, pts: List[Tuple[float, float, float]]) -> Path:
         path = Path()
         path.header = header
-        for (x, y, z) in pts:
+        
+        if not pts:
+            return path
+            
+        n_pts = len(pts)
+        arr = np.array(pts, dtype=np.float64)
+        
+        # 计算全局轨迹的切线方向（此时 pts 已经是 odom 坐标系）
+        yaws = np.zeros(n_pts, dtype=np.float64)
+        if n_pts >= 2:
+            dx = np.diff(arr[:, 0])
+            dy = np.diff(arr[:, 1])
+            segment_yaws = np.arctan2(dy, dx)
+            yaws[:-1] = segment_yaws
+            yaws[-1] = segment_yaws[-1]
+            if n_pts >= 3:
+                ds = np.hypot(dx, dy)
+                s = np.concatenate(([0.0], np.cumsum(ds)))
+                smooth_dx = np.gradient(arr[:, 0], s, edge_order=2)
+                smooth_dy = np.gradient(arr[:, 1], s, edge_order=2)
+                yaws = np.unwrap(np.arctan2(smooth_dy, smooth_dx))
+        
+        # 直接赋值
+        for i in range(n_pts):
+            global_x, global_y, global_z = pts[i]
+            global_yaw = yaws[i]
+            
+            # 转换为四元数
+            qz = math.sin(global_yaw / 2.0)
+            qw = math.cos(global_yaw / 2.0)
+            
             ps = PoseStamped()
-            ps.header = header
-            ps.pose.position.x = float(x)
-            ps.pose.position.y = float(y)
-            ps.pose.position.z = float(z)
-            ps.pose.orientation.w = 1.0
+            ps.header = path.header
+            ps.pose.position.x = float(global_x)
+            ps.pose.position.y = float(global_y)
+            ps.pose.position.z = float(global_z)
+            ps.pose.orientation.x = 0.0
+            ps.pose.orientation.y = 0.0
+            ps.pose.orientation.z = float(qz)
+            ps.pose.orientation.w = float(qw)
+            
             path.poses.append(ps)
+            
         return path
 
     def make_marker(self, header, pts: List[Tuple[float, float, float]]) -> Marker:
